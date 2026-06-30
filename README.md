@@ -1,2 +1,2 @@
 # YuhiButton
-[Install Script here](https://yuhiamatsume.github.io/YuhiButton/YuhiButton.user.js)
+[Install Script here](https://afiliafrostfang.github.io/YuhiButton/YuhiButton.user.js)
