@@ -431,7 +431,7 @@ GM_addStyle(`
 
    $("body").on("click", "#chilloutArea", function() {
         if (allianceMissions.length === 0) {
-            $("AfiliaModalBody").html(`<center><img src="https://afiliafrostfang.github.io/AfiliaButton/splash.jpg" style="height:60%;width:60%"></center>`);
+            $("#AfiliaModalBody").html(`<center><img src="https://afiliafrostfang.github.io/AfiliaButton/splash.jpg" style="height:60%;width:60%"></center>`);
         }
     });
 
