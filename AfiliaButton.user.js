@@ -195,6 +195,18 @@ height: 650px;
 overflow-y: auto;
 }`);
 
+GM_addStyle(`
+#AfiliaVersion {
+    cursor: pointer;
+    color: #337ab7;
+}
+
+#AfiliaVersion:hover {
+    text-decoration: underline;
+    color: #23527c;
+}
+`);
+
     $("body")
         .prepend(`<div class="modal fade bd-example-modal-lg" id="AfiliaModal" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg" role="document">
@@ -203,7 +215,7 @@ overflow-y: auto;
                           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&#x274C;</span>
                           </button>
-                          <h5 class="modal-title"><center>April April der macht wassa will.</center></h5>
+                          <h5 class="modal-title"><center>Sommer Sonne Sonnenschein.</center></h5>
                           <div class="btn-group">
                             <a class="btn btn-success btn-xs" id="AfiliaScan">Scan</a>
                             <a class="btn btn-success btn-xs" id="AfiliaStart">Start</a>
@@ -217,7 +229,9 @@ overflow-y: auto;
                           </div>
                           <div class="modal-footer">
                             <button type="button" class="btn btn-danger" id="close" data-dismiss="modal">Schließen</button>
-                            <div class="pull-left">v ${GM_info.script.version}</div>
+                            <div class="pull-left" id="AfiliaVersion">
+                              v ${GM_info.script.version}
+                            </div>
                           </div>
                     </div>
                   </div>`);
@@ -225,6 +239,12 @@ overflow-y: auto;
     $("#search_input_field_missions")
         .before(`<a id="chilloutArea" data-toggle="modal" data-target="#AfiliaModal" class="btn btn-danger btn-xs">
                    <span class="glyphicon glyphicon-queen"></span>Einsatzbereit</a>`);
+
+    $("body").on("click", "#AfiliaVersion", function() {
+    if (versionData && versionData.updateURL2) {
+        window.open(versionData.updateURL2, "_blank");
+    }
+});
 
     function scanMissions() {
 
