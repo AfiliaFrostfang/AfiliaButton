@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Afilia Button
-// @version      1.1.9
+// @version      1.2.0
 // @author       AfiliaFrostfang
 // @include      *://www.leitstellenspiel.de/*
 // @grant        GM_addStyle
@@ -431,7 +431,7 @@ GM_addStyle(`
 
    $("body").on("click", "#chilloutArea", function() {
         if (allianceMissions.length === 0) {
-            $("#AfiliaModalBody").html(`<center><img src="https://afiliafrostfang.github.io/AfiliaButton/splash.jpg" style="height:60%;width:60%"></center>`);
+            $("#AfiliaModalBody").html(`<center><img src="https://afiliafrostfang.github.io/AfiliaButton/splash.jpg" style="height:90%;width:90%"></center>`);
         }
     });
 
