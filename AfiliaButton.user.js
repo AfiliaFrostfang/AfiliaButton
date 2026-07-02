@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Afilia Button
-// @version      1.2.0
+// @version      1.2.1
 // @author       AfiliaFrostfang
 // @include      *://www.leitstellenspiel.de/*
 // @grant        GM_addStyle
@@ -174,7 +174,14 @@
 
     var aVehicleTypes = JSON.parse(sessionStorage.aVehicleTypesNew).value;
     var aMissions = JSON.parse(sessionStorage.aMissions).value;
-    var config = await idbGet("AfiliaConfig") || {"credits": 0, "vehicles": [], "missionListActive": true};
+    var config = await idbGet("AfiliaConfig") || {
+        credits: 0,
+        vehicles: [],
+        missionListActive: true,
+        sendThreeVehicles: false
+    };
+
+    config.sendThreeVehicles ??= false;
     var allianceMissions = [];
 
     GM_addStyle(`.modal {
@@ -374,6 +381,7 @@ GM_addStyle(`
             var mission = $(missionHtml);
 
             var checkboxes = mission.find(".vehicle_checkbox");
+            const maxVehicles = config.sendThreeVehicles ? 3 : 1;
 
             if (!checkboxes || checkboxes.length === 0) {
                 $("#tr_" + mId).removeClass("alert-info").addClass("alert-danger");
@@ -381,31 +389,49 @@ GM_addStyle(`
                 continue;
             }
 
-            for (var v = 0; v < checkboxes.length; v++) {
-                var vAttr = checkboxes[v].attributes;
-                var vType = +vAttr.vehicle_type_id.value;
-                var vId = +vAttr.value.value;
+        const vehiclesToSend = [];
 
-                if (config.vehicles.includes(vType) && !foundVehicles.includes(vId)) {
-                    $("#status_" + mId).text("alarmiere ...");
+        for (var v = 0; v < checkboxes.length; v++) {
 
-                    await $.post('/missions/' + mId + '/alarm', { 'vehicle_ids': vId }).done(function () {
-                        foundVehicles.push(vId);
-                        $("#tr_" + mId).remove();
-                        console.log(foundVehicles);
-                    });
+            var vAttr = checkboxes[v].attributes;
+            var vType = +vAttr.vehicle_type_id.value;
+            var vId = +vAttr.value.value;
 
+            if (
+                config.vehicles.includes(vType) &&
+                !foundVehicles.includes(vId)
+            ) {
+
+                vehiclesToSend.push(vId);
+
+                if (vehiclesToSend.length >= maxVehicles)
                     break;
-                }
-
-                if (v + 1 == checkboxes.length) {
-                    $("#tr_" + mId).removeClass("alert-info").addClass("alert-danger");
-                    $("#status_" + mId).text("Fahrzeuge außer Reichweite oder nicht vorhanden!");
-                    break;
-                }
             }
         }
+
+        if (vehiclesToSend.length > 0) {
+
+            $("#status_" + mId).text("alarmiere ...");
+
+            await $.post('/missions/' + mId + '/alarm', {
+                vehicle_ids: vehiclesToSend
+            }).done(function () {
+
+                foundVehicles.push(...vehiclesToSend);
+                $("#tr_" + mId).remove();
+
+            });
+
+        } else {
+
+            $("#tr_" + mId)
+                .removeClass("alert-info")
+                .addClass("alert-danger");
+
+        $("#status_" + mId).text("Fahrzeuge außer Reichweite oder nicht vorhanden!");
+        }
     }
+}
 
     function mapVehicles(arrClasses, trigger) {
         var returnValue = [];
@@ -465,6 +491,9 @@ GM_addStyle(`
             <label for="AfiliaMissionListActive">Eigene Einsätze berücksichtigen?</label>
             <input type="checkbox" id="AfiliaMissionListActive" ${config.missionListActive ? 'checked' : ''}>
             <br><br>
+            <label for="AfiliaSendThreeVehicles">3 Fahrzeuge gleichzeitig alarmieren</label>
+            <input type="checkbox" id="AfiliaSendThreeVehicles" ${config.sendThreeVehicles ? 'checked' : ''}
+            <br><br>
             <label for="AfiliaVehicleTypes">Fahrzeugtypen (Mehrfachauswahl mit Strg + Klick)</label>
             <select multiple class="form-control" id="AfiliaVehicleTypes" style="height:20em;width:40em"></select>
             <br><br>
@@ -483,6 +512,7 @@ GM_addStyle(`
         config.maxCredits = +$("#AfiliaMaxCredits").val();
         config.vehicles = mapVehicles($("#AfiliaVehicleTypes").val(), "type");
         config.missionListActive = $("#AfiliaMissionListActive").is(":checked");
+        config.sendThreeVehicles = $("#AfiliaSendThreeVehicles").is(":checked");
         await idbSet("AfiliaConfig", config);
     
         var timeoutValue = $("#AfiliaTimeout").val();
